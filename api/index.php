@@ -3,7 +3,9 @@
 include 'config/const.php';
 
 header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json; charset=UTF-8");
+header("Access-Control-Allow-Credentials: true");
+header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+header("Access-Control-Allow-Headers: *");
 
 class Connect
 {
@@ -33,16 +35,45 @@ class Connect
 
 function loadUserData(Connect $connect):array
 {
-        $query = "SELECT * FROM `users`";
+        $query = "SELECT * FROM `tasks`";
         $stmt = $connect->connect(PATH_CONF)->prepare($query);
         $stmt->execute();
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $rows;
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+function saveUser(Connect $connect, string $title, string $descriptions, int $importance, int $implementation):bool
+    {
+        $query = 'INSERT INTO `tasks` (title, descriptions, importance, implementation) VALUES (:title, :descriptions, :importance, :implementation)';
+        $params = [
+            ':title' => $title,
+            ':descriptions' => $descriptions,
+            ':importance' => $importance,
+            ':implementation' => $implementation
+        ];
+        $stmt = $connect->connect(PATH_CONF)->prepare($query);
+        $stmt->execute($params);
+        if ($stmt) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+if ($_SERVER['REQUEST_METHOD'] == 'GET' && parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) == '/all') {
     $conn = new Connect();
     $data = loadUserData($conn);
     http_response_code(200);
-    echo json_encode($data);
+    print json_encode($data);
+} elseif ($_SERVER['REQUEST_METHOD'] == 'POST' && $_SERVER['CONTENT_TYPE'] == 'application/json' && parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) == '/create') {
+    $str = file_get_contents('php://input').PHP_EOL;
+    $strArr = json_decode($str, true);
+    $conn = new Connect();
+    if ($newUser = saveUser($conn, $strArr['title'], $strArr['descriptions'], $strArr['importance'], $strArr['implementation'])) {
+        print 'Task created!';
+    } else {
+        print 'error';
+    }
+} else {
+    print 'error';
 }
