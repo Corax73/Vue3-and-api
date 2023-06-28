@@ -2,8 +2,8 @@
   <div>
     <span>Work!</span>
     <button @click="getTasks">Get</button>
-    <TasksList :tasks="tasks"/>
-    <CreateTask @newData="createTask" :creationAnswer="creationAnswer" />
+    <TasksList @deleteTask='deletingTask' :tasks="tasks"/>
+    <CreateTask @newData='createTask' :creationAnswer="creationAnswer" />
   </div>
 </template>
 
@@ -13,6 +13,7 @@ import TasksList from './components/TasksList.vue';
 import CreateTask from './components/CreateTask.vue';
 axios.defaults.headers.common['Accept'] = 'application/json';
   export default {
+    emits: ['newData', 'deleteTask'],
     components: {
       TasksList, CreateTask
     },
@@ -33,6 +34,7 @@ axios.defaults.headers.common['Accept'] = 'application/json';
         try {
           const response = await axios.get('http://localhost:8000/all');
           this.tasks = response.data;
+          this.creationAnswer = '';
         } catch(e) {
           alert('Error!');
         }
@@ -43,6 +45,18 @@ axios.defaults.headers.common['Accept'] = 'application/json';
           .then(response => {
             this.creationAnswer = response.data;
           })
+          this.getTasks();
+        } catch(e) {
+          alert('Error!');
+        }
+      },
+      async deletingTask(data) {
+        try {
+          const response = await axios.post('http://localhost:8000/delete', data)
+          .then(response => {
+            this.creationAnswer = response.data;
+          })
+          this.getTasks();
         } catch(e) {
           alert('Error!');
         }

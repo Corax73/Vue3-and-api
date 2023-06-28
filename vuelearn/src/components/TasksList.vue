@@ -5,6 +5,9 @@
             <p><strong>Descriptions: {{ task.descriptions }}</strong></p>
             <p><strong>Importance: {{ task.importance }}</strong></p>
             <p><strong>Implementation: {{ task.implementation }}</strong></p>
+            <button @click='deleteTask(task.id)'>
+                Delete task❌
+            </button>
         </div>
     </div>
 </template>
@@ -16,10 +19,29 @@
                 type: Array,
                 required: true
             }
+        },
+        emits: ['deleteTask'],
+        data () {
+            return {
+                id: ''
+            }
+        },
+        methods: {
+            deleteTask (taskId) {
+                this.id = taskId;
+                this.$emit('deleteTask', {
+                    id: this.id
+                });
+            }
         }
     }
 </script>
 
 <style scoped>
-
+.task {
+    padding: 15px;
+    border: 4px solid red;
+    margin-top: 15px;
+    border-radius: 8px;
+}
 </style>

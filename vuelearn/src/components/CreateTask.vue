@@ -17,6 +17,7 @@
 
 <script>
     export default {
+        emits: ['newData'],
         props: {
             creationAnswer: {
                 type: String
@@ -45,5 +46,10 @@
 </script>
 
 <style scoped>
-
+.create-task {
+    padding: 15px;
+    border: 4px solid blueviolet;
+    margin-top: 15px;
+    border-radius: 8px;
+}
 </style>

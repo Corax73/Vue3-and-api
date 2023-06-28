@@ -35,30 +35,45 @@ class Connect
 
 function loadUserData(Connect $connect):array
 {
-        $query = "SELECT * FROM `tasks`";
-        $stmt = $connect->connect(PATH_CONF)->prepare($query);
-        $stmt->execute();
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return $rows;
+    $query = "SELECT * FROM `tasks`";
+    $stmt = $connect->connect(PATH_CONF)->prepare($query);
+    $stmt->execute();
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return $rows;
 }
 
 function saveUser(Connect $connect, string $title, string $descriptions, int $importance, int $implementation):bool
-    {
-        $query = 'INSERT INTO `tasks` (title, descriptions, importance, implementation) VALUES (:title, :descriptions, :importance, :implementation)';
-        $params = [
-            ':title' => $title,
-            ':descriptions' => $descriptions,
-            ':importance' => $importance,
-            ':implementation' => $implementation
-        ];
-        $stmt = $connect->connect(PATH_CONF)->prepare($query);
-        $stmt->execute($params);
-        if ($stmt) {
-            return true;
-        } else {
-            return false;
-        }
+{
+    $query = 'INSERT INTO `tasks` (title, descriptions, importance, implementation) VALUES (:title, :descriptions, :importance, :implementation)';
+    $params = [
+        ':title' => $title,
+        ':descriptions' => $descriptions,
+        ':importance' => $importance,
+        ':implementation' => $implementation
+    ];
+    $stmt = $connect->connect(PATH_CONF)->prepare($query);
+    $stmt->execute($params);
+    if ($stmt) {
+        return true;
+    } else {
+        return false;
     }
+}
+
+function deleteUser(Connect $connect, int $id):bool
+{
+    $query = 'DELETE FROM `tasks` WHERE `id` = :id';
+    $params = [
+        ':id' => $id
+    ];
+    $stmt = $connect->connect(PATH_CONF)->prepare($query);
+    $stmt->execute($params);
+    if ($stmt) {
+        return true;
+    } else {
+        return false;
+    }
+}
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET' && parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) == '/all') {
     $conn = new Connect();
@@ -71,6 +86,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && parse_url($_SERVER['REQUEST_URI'], PH
     $conn = new Connect();
     if ($newUser = saveUser($conn, $strArr['title'], $strArr['descriptions'], $strArr['importance'], $strArr['implementation'])) {
         print 'Task created!';
+    } else {
+        print 'error';
+    }
+} elseif ($_SERVER['REQUEST_METHOD'] == 'POST' && $_SERVER['CONTENT_TYPE'] == 'application/json' && parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) == '/delete') {
+    $str = file_get_contents('php://input').PHP_EOL;
+    $strArr = json_decode($str, true);
+    $conn = new Connect();
+    if ($newUser = deleteUser($conn, (integer)$strArr['id'])) {
+        print 'Task deleted!';
     } else {
         print 'error';
     }
