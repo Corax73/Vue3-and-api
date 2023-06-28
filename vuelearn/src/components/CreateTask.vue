@@ -1,5 +1,6 @@
 <template>
-    <div class="create-task">
+    <button @click="getForm">Form to create</button>
+    <div class="create-task" ref="form">
         <div>
             <label for="title">Title</label>
             <p><input type="text" v-model='title'></p>
@@ -17,28 +18,44 @@
 
 <script>
     export default {
-        emits: ['newData'],
+        emits: ['newData', 'getForm'],
         props: {
             creationAnswer: {
                 type: String
             }
         },
-        data () {
+        data() {
             return {
                 title: '',
                 descriptions: '',
                 importance: 1,
-                implementation: 0
+                implementation: 0,
+                click: false
             }
         },
         methods: {
-            newData () {
+            newData() {
                 this.$emit('newData', {
                     title: this.title,
                     descriptions: this.descriptions,
                     importance: this.importance,
                     implementation: this.implementation
-                })
+                });
+            },
+            getForm() {
+                if (!this.click) {
+                    this.$emit('getForm', {
+                        visibility: 'display: block;',
+                        ref: this.$refs.form
+                    });
+                    this.click = true;
+                } else if (this.click) {
+                    this.$emit('getForm', {
+                        visibility: 'display: none;',
+                        ref: this.$refs.form
+                    });
+                    this.click = false;
+                }
             }
         }
     }
@@ -51,5 +68,6 @@
     border: 4px solid blueviolet;
     margin-top: 15px;
     border-radius: 8px;
+    display: none;
 }
 </style>

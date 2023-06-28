@@ -3,7 +3,7 @@
     <span>Work!</span>
     <button @click="getTasks">Get</button>
     <TasksList @deleteTask='deletingTask' :tasks="tasks"/>
-    <CreateTask @newData='createTask' :creationAnswer="creationAnswer" />
+    <CreateTask @newData='createTask' @getForm='showFormToCreate' :creationAnswer="creationAnswer" />
   </div>
 </template>
 
@@ -13,7 +13,7 @@ import TasksList from './components/TasksList.vue';
 import CreateTask from './components/CreateTask.vue';
 axios.defaults.headers.common['Accept'] = 'application/json';
   export default {
-    emits: ['newData', 'deleteTask'],
+    emits: ['newData', 'deleteTask', 'getForm'],
     components: {
       TasksList, CreateTask
     },
@@ -60,6 +60,9 @@ axios.defaults.headers.common['Accept'] = 'application/json';
         } catch(e) {
           alert('Error!');
         }
+      },
+      showFormToCreate(data) {
+        data.ref.style = data.visibility;
       }
     }
   }

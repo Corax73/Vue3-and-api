@@ -85,6 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && parse_url($_SERVER['REQUEST_URI'], PH
     $strArr = json_decode($str, true);
     $conn = new Connect();
     if ($newUser = saveUser($conn, $strArr['title'], $strArr['descriptions'], $strArr['importance'], $strArr['implementation'])) {
+        http_response_code(200);
         print 'Task created!';
     } else {
         print 'error';
@@ -94,6 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && parse_url($_SERVER['REQUEST_URI'], PH
     $strArr = json_decode($str, true);
     $conn = new Connect();
     if ($newUser = deleteUser($conn, (integer)$strArr['id'])) {
+        http_response_code(200);
         print 'Task deleted!';
     } else {
         print 'error';

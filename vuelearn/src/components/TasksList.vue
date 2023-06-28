@@ -21,13 +21,13 @@
             }
         },
         emits: ['deleteTask'],
-        data () {
+        data() {
             return {
                 id: ''
             }
         },
         methods: {
-            deleteTask (taskId) {
+            deleteTask(taskId) {
                 this.id = taskId;
                 this.$emit('deleteTask', {
                     id: this.id
