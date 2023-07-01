@@ -1,12 +1,11 @@
 <template>
     <div class="task" v-for="task in tasks">
         <div>
-            <p><strong>Title: {{ task.title }}</strong></p>
+            <p><strong><router-link :to="{name: 'task-edit', params: {id: task.id} }" :task="task">Title: {{ task.title }}</router-link></strong></p>
             <p><strong>Descriptions: {{ task.descriptions }}</strong></p>
             <p><strong>Importance: {{ task.importance }}</strong></p>
             <p><strong>Implementation: {{ task.implementation }}</strong></p>
             <button @click='deleteTask(task.id)'>
-                Delete task❌
             </button>
         </div>
     </div>
@@ -23,7 +22,8 @@
         emits: ['deleteTask'],
         data() {
             return {
-                id: ''
+                id: '',
+                task: Object
             }
         },
         methods: {
