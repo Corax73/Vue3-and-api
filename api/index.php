@@ -33,7 +33,7 @@ class Connect
     }
 }
 
-function loadUserData(Connect $connect):array
+function loadTasksData(Connect $connect):array
 {
     $query = "SELECT * FROM `tasks`";
     $stmt = $connect->connect(PATH_CONF)->prepare($query);
@@ -42,7 +42,19 @@ function loadUserData(Connect $connect):array
     return $rows;
 }
 
-function saveUser(Connect $connect, string $title, string $descriptions, int $importance, int $implementation):bool
+function loadOneTaskData(Connect $connect, int $id):array
+{
+    $query = "SELECT * FROM `tasks` WHERE `id` = :id";
+    $params = [
+        ':id' => $id
+    ];
+    $stmt = $connect->connect(PATH_CONF)->prepare($query);
+    $stmt->execute($params);
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return $rows;
+}
+
+function saveTask(Connect $connect, string $title, string $descriptions, int $importance, int $implementation):bool
 {
     $query = 'INSERT INTO `tasks` (title, descriptions, importance, implementation) VALUES (:title, :descriptions, :importance, :implementation)';
     $params = [
@@ -60,7 +72,7 @@ function saveUser(Connect $connect, string $title, string $descriptions, int $im
     }
 }
 
-function deleteUser(Connect $connect, int $id):bool
+function deleteTask(Connect $connect, int $id):bool
 {
     $query = 'DELETE FROM `tasks` WHERE `id` = :id';
     $params = [
@@ -75,16 +87,50 @@ function deleteUser(Connect $connect, int $id):bool
     }
 }
 
+function updateUser(Connect $connect, array $newData, int $task_id):bool
+{
+    foreach ($newData as $key=>$value) {
+        if (!empty($value)) {
+            $newData[$key] = $value;
+        }
+    }
+    unset($newData['id']);
+    $keys = array_keys($newData);
+    $query = 'UPDATE `tasks` SET ';
+    $params = [];
+    foreach ($keys as $key) {
+        $query .= '`' . $key . '` = :' . $key . ', ';
+        $params[':' . $key] = $newData[$key];
+        }
+    $query = mb_substr($query, 0, -2);
+    $query .= ' WHERE `id` = ' . $task_id;
+
+    $stmt = $connect->connect(PATH_CONF)->prepare($query);
+    $stmt->execute($params);
+    if ($stmt) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'GET' && parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) == '/all') {
     $conn = new Connect();
-    $data = loadUserData($conn);
+    $data = loadTasksData($conn);
+    http_response_code(200);
+    print json_encode($data);
+} elseif ($_SERVER['REQUEST_METHOD'] == 'POST' && parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) == '/get-one-task') {
+    $str = file_get_contents('php://input').PHP_EOL;
+    $strArr = json_decode($str, true);
+    $conn = new Connect();
+    $data = loadOneTaskData($conn, (integer)$strArr['id']);
     http_response_code(200);
     print json_encode($data);
 } elseif ($_SERVER['REQUEST_METHOD'] == 'POST' && $_SERVER['CONTENT_TYPE'] == 'application/json' && parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) == '/create') {
     $str = file_get_contents('php://input').PHP_EOL;
     $strArr = json_decode($str, true);
     $conn = new Connect();
-    if ($newUser = saveUser($conn, $strArr['title'], $strArr['descriptions'], $strArr['importance'], $strArr['implementation'])) {
+    if ($newTask = saveTask($conn, $strArr['title'], $strArr['descriptions'], $strArr['importance'], $strArr['implementation'])) {
         http_response_code(200);
         print 'Task created!';
     } else {
@@ -94,9 +140,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && parse_url($_SERVER['REQUEST_URI'], PH
     $str = file_get_contents('php://input').PHP_EOL;
     $strArr = json_decode($str, true);
     $conn = new Connect();
-    if ($newUser = deleteUser($conn, (integer)$strArr['id'])) {
+    if ($newTask = deleteTask($conn, (integer)$strArr['id'])) {
         http_response_code(200);
         print 'Task deleted!';
+    } else {
+        print 'error';
+    }
+} elseif ($_SERVER['REQUEST_METHOD'] == 'POST' && $_SERVER['CONTENT_TYPE'] == 'application/json' && parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) == '/update') {
+    $str = file_get_contents('php://input').PHP_EOL;
+    $strArr = json_decode($str, true);
+    $conn = new Connect();
+    if ($updateTask = updateUser($conn, $strArr, $strArr['id'])) {
+        http_response_code(200);
+        print 'Task updated!';
     } else {
         print 'error';
     }

@@ -1,7 +1,7 @@
 <template>
     <div class="task" v-for="task in tasks">
         <div>
-            <p><strong><router-link :to="{name: 'task-edit', params: {id: task.id} }" :task="task">Title: {{ task.title }}</router-link></strong></p>
+            <p><strong><router-link :to="{name: 'task-edit', params: {id: task.id} }">Title: {{ task.title }}</router-link></strong></p>
             <p><strong>Descriptions: {{ task.descriptions }}</strong></p>
             <p><strong>Importance: {{ task.importance }}</strong></p>
             <p><strong>Implementation: {{ task.implementation }}</strong></p>
