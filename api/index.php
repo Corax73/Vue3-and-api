@@ -89,18 +89,19 @@ function deleteTask(Connect $connect, int $id):bool
 
 function updateUser(Connect $connect, array $newData, int $task_id):bool
 {
+    $dataForUpdate = [];
     foreach ($newData as $key=>$value) {
         if (!empty($value)) {
-            $newData[$key] = $value;
+            $dataForUpdate[$key] = $value;
         }
     }
-    unset($newData['id']);
-    $keys = array_keys($newData);
+    unset($dataForUpdate['id']);
+    $keys = array_keys($dataForUpdate);
     $query = 'UPDATE `tasks` SET ';
     $params = [];
     foreach ($keys as $key) {
         $query .= '`' . $key . '` = :' . $key . ', ';
-        $params[':' . $key] = $newData[$key];
+        $params[':' . $key] = $dataForUpdate[$key];
         }
     $query = mb_substr($query, 0, -2);
     $query .= ' WHERE `id` = ' . $task_id;

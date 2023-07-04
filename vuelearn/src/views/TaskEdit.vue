@@ -54,10 +54,10 @@ axios.defaults.headers.common['Accept'] = 'application/json';
             async updateTask() {
                 let newData = {
                     id: this.task.id,
-                    title: this.title ? this.title : this.task.title,
-                    descriptions: this.descriptions ? this.descriptions : this.task.descriptions,
-                    importance: this.importance ? this.importance : this.task.importance,
-                    implementation: this.implementation ? 1 : 0
+                    title: this.title,
+                    descriptions: this.descriptions,
+                    importance: this.importance,
+                    implementation: this.implementation
                 };
                 try {
                     const response = await axios.post('http://localhost:8000/update', newData)
